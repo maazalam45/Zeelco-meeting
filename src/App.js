@@ -96,6 +96,7 @@ function App() {
         else {
           setSharingpeerid(e)
           setChangeScreenView(true)
+          console.log("step 2 sharing")
         }
       });
     })
@@ -126,9 +127,9 @@ function App() {
             });
 
             setMystream(stream);
-            // if (screenshare == true) {
-            videoInput.current.srcObject = stream;
-            // }
+            if (changeScreenView == true) {
+              videoInput.current.srcObject = stream;
+            }
             peer.on("call", function (call) {
               call.answer(stream); // Answer the call with an A/V stream.
               call.on("stream", async function (remoteStream) {
@@ -179,6 +180,7 @@ function App() {
           })
             .then(async (stream) => {
               setMystream(stream);
+              // videoInput.current.srcObject = stream;
               //console.log(usercalls[0].peerConnection.getSenders(), "aaaaaaaaaaaaccccccccc")
               // loop through all call and disonnct
               // call all the users again
@@ -473,6 +475,8 @@ function App() {
     if (screenshare == false) {
       setAnchorEl(null);
       setScreenshare(true)
+      setChangeScreenView(true)
+      console.log("step 1 sharing")
       const id = await localStorage.getItem('MySharingid')
       socket.emit("Screenshare", { peer_id: id, room: params["meeting_id"] }, true)
     }
@@ -485,6 +489,7 @@ function App() {
   }
 
   const MySharedScreen = (props) => {
+    // console.log("step 3 sharing")
     const refe = React.useRef();
     useEffect(() => {
       refe.current.srcObject = props.remotestreams;
@@ -493,6 +498,7 @@ function App() {
     return (
       <>
         <video
+          className="videosharing"
           style={{
             // position: "absolute",
             height: 500, width: "130%",
@@ -573,11 +579,12 @@ function App() {
             <Container style={{ marginLeft: '15%' }}>
               {
                 changeScreenView == true ? <>
+                  {/* {console.log("step 2 sharing")} {console.log("step 3 sharing")}*/}
                   {screenshare == true ?
-                    (<MySharedScreen remotestreams={mystream} />)
+                    (<><MySharedScreen remotestreams={mystream} /></>)
                     : (
                       screenStreams.map((element, i) => {
-                        console.log(element, Sharingpeerid.peer_id, "ssssssss")
+                        // console.log(element, Sharingpeerid.peer_id, "ssssssss")
                         return <SharedScreen remotestreams={element} />
                       })
                     )}

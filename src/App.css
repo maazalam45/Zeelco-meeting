@@ -199,3 +199,22 @@ video {
 .stop {
   color: #cc3b33;
 }
+
+/* .videosharing{
+  height: 500 !important; 
+  width: 130%;
+}
+@media (max-width: 991.98px) {
+  .videosharing{
+    height: 500 !important; 
+    width: 100%;
+  }
+} */
+/* @media (max-width: 767.98px) { 
+  .videosharing{
+    height: 500; 
+    width: 80%;
+  }
+} */
+
+/* @media (max-width: 575.98px) { ... } */
