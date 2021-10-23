@@ -68,7 +68,7 @@ function App() {
   // const [panel, setPanel] = React.useState(true);
   const [message, setMessage] = React.useState("");
   const [chatlist, setChatlist] = React.useState([]);
-  // const [participants, setParticipants] = React.useState([]);
+  const [members, setMembers] = React.useState([]);
   const [modalIsOpen, setIsOpen] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [streams, setStreams] = React.useState([]);
@@ -127,9 +127,9 @@ function App() {
             });
 
             setMystream(stream);
-            if (changeScreenView == true) {
-              videoInput.current.srcObject = stream;
-            }
+            // if (changeScreenView == true) {
+            videoInput.current.srcObject = stream;
+            // }
             peer.on("call", function (call) {
               call.answer(stream); // Answer the call with an A/V stream.
               call.on("stream", async function (remoteStream) {
@@ -246,6 +246,8 @@ function App() {
       });
     })
     socket.on("User_Connected", (ee) => {
+      // console.log(ee, 'aaccxxxx')
+      setMembers(ee);
       ee.forEach(element => {
         let conn = peer.connect(`${element.peer_id}`);
         conn.on("open", function () {
@@ -562,8 +564,15 @@ function App() {
               onClick={closeModal}
             />
           </p>
-          <div style={{ marginTop: 10 }}>
-            <p className="modaluser">Maaz</p>
+          <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
+            {members.length == 0 ? (
+              <p className="modaluser">No Participants</p>
+
+            ) : (
+                members.map((element, i) => {
+                  return <div style={{ flexDirection: 'row', display: 'flex', marginTop: 10, width: '70%', justifyContent: 'center' }}><img src={`https://zeelco.com/public/profile_img/${element.profile_pic}`} alt="User's Image" style={{ height: 50, width: 50, borderRadius: 100 }} /><p style={{ marginLeft: "10%" }} className="modaluser">{element.name}</p></div>
+                })
+              )}
           </div>
         </div>
       </Modal>
@@ -612,6 +621,7 @@ function App() {
                     >
                       {/* <p style={{ color: "white" }}>My video</p> */}
                     </video>
+                    <p style={{ fontWeight: "bolder", color: "white", position: 'absolute', zIndex: 5, marginTop: 200, marginLeft: 47 }}>{Mydetails.name}</p>
                     {streams.length == 0 ? (<div>No Participants</div>) : (
                       streams.map((element, i) => {
                         // console.log(element, 'aaa')
