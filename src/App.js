@@ -59,6 +59,7 @@ const Container = styled.div`
 `;
 function App() {
   const videoInput = React.useRef(null);
+  const vidgrid = React.useRef(null);
   // const remoteInput = React.useRef(null);
   const [Mydetails, setMydetails] = React.useState({});
   const [chats, setChats] = React.useState(true);
@@ -131,14 +132,18 @@ function App() {
             videoInput.current.srcObject = stream;
             // }
             peer.on("call", function (call) {
+
               call.answer(stream); // Answer the call with an A/V stream.
               call.on("stream", async function (remoteStream) {
                 const id = await localStorage.getItem('Myid')
                 let obj = remoteStream
                 obj['peerid'] = id
-                setStreams([...streams, obj]);
+                vidgrid.current.append_stream(remoteStream)
+                //setStreams([...streams, obj]);
                 // console.log(obj, "qwertyyyyyyy")
               });
+
+
             });
             screen_share_peer.on("call", function (call) {
               call.answer(stream); // Answer the call with an A/V stream.
@@ -157,19 +162,24 @@ function App() {
                 // console.log(element, 'aaasssdddd')
                 if (element.peer_id != id) {
                   console.log(element.peer_id != id, "kkkkkks")
+
                   var call = peer.call(`${element.peer_id}`, stream);
                   setUsercalls([...usercalls, call])
                   call.on("stream", function (remoteStream) {
                     if (element.peer_id != id) {
                       console.log("qwqwqwqwqwqF");
                       let obj = remoteStream
+                      window.localStorage.setItem("vv", remoteStream)
                       obj['peerid'] = element.peer_id
-                      setStreams([...streams, obj]);
+                      vidgrid.current.append_stream(remoteStream)
+                      //setStreams([...streams, obj]);
                       // replaceStream(usercalls[0], stream)
                       // console.log(obj, "qwertyyyyffffyyy")
 
                     }
                   });
+
+
                 }
               });
             });
@@ -519,6 +529,36 @@ function App() {
 
 
   }
+  const Vidgrid = React.forwardRef((props, ref) => {
+    const [streamss, setStreamss] = React.useState([])
+    React.useImperativeHandle(ref, () => ({
+      append_stream(stream) {
+        let tmp = streamss
+        tmp.push(stream)
+        console.log(tmp, "pp")
+        setStreamss([...streamss, stream])
+
+      }
+    }));
+
+    useEffect(() => {
+      console.log("1121212121", streamss.length)
+
+    }, [streamss])
+
+    return (
+      <>
+        {
+          streamss.length == 0 ? (<div style={{ "color": "white" }}>No Participants</div>) : (
+            streamss.map((element, i) => {
+              console.log(element, 'aaa', i)
+              return <Video remotestreams={element} ind={i} />
+            })
+          )
+        }
+      </>
+    )
+  })
   const SharedScreen = (props) => {
     const refs = React.useRef();
     useEffect(() => {
@@ -622,12 +662,8 @@ function App() {
                       {/* <p style={{ color: "white" }}>My video</p> */}
                     </video>
                     <p style={{ fontWeight: "bolder", color: "white", position: 'absolute', zIndex: 5, marginTop: 200, marginLeft: 47 }}>{Mydetails.name}</p>
-                    {streams.length == 0 ? (<div>No Participants</div>) : (
-                      streams.map((element, i) => {
-                        // console.log(element, 'aaa')
-                        return <Video remotestreams={element} ind={i} />
-                      })
-                    )}</>)
+                    <Vidgrid streams={streams} ref={vidgrid}></Vidgrid>
+                  </>)
               }
 
             </Container>
