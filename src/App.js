@@ -132,13 +132,20 @@ function App() {
             videoInput.current.srcObject = stream;
             // }
             peer.on("call", function (call) {
-
+              console.log(call, "qqqqqqqqqqqqqqq")
               call.answer(stream); // Answer the call with an A/V stream.
+              let k = 0
               call.on("stream", async function (remoteStream) {
+
+                k += 1
                 const id = await localStorage.getItem('Myid')
                 let obj = remoteStream
                 obj['peerid'] = id
-                vidgrid.current.append_stream(remoteStream)
+                if (k == 1) {
+                  console.log("dfdfdfdfdf")
+                  vidgrid.current.append_stream(remoteStream, false)
+
+                }
                 //setStreams([...streams, obj]);
                 // console.log(obj, "qwertyyyyyyy")
               });
@@ -167,11 +174,11 @@ function App() {
                   setUsercalls([...usercalls, call])
                   call.on("stream", function (remoteStream) {
                     if (element.peer_id != id) {
-                      console.log("qwqwqwqwqwqF");
+                      console.log("qwqwqwqwqwqFffffffff", remoteStream);
                       let obj = remoteStream
-                      window.localStorage.setItem("vv", remoteStream)
+                      //window.localStorage.setItem("vv", remoteStream)
                       obj['peerid'] = element.peer_id
-                      vidgrid.current.append_stream(remoteStream)
+                      vidgrid.current.append_stream(remoteStream, true)
                       //setStreams([...streams, obj]);
                       // replaceStream(usercalls[0], stream)
                       // console.log(obj, "qwertyyyyffffyyy")
@@ -203,6 +210,7 @@ function App() {
                   var call = screen_share_peer.call(`${element.Screen_share_peer}`, stream);
                   setUsersharingcalls([...usersharingcalls, call])
                   call.on("stream", function (remoteStream) {
+                    console.log("FFFFFFFFFFFFFFFFFFFFFFF");
                     if (element.peer_id != id) {
                       console.log("qwqwqwqwqwqF");
                       let obj = remoteStream
@@ -532,25 +540,42 @@ function App() {
   const Vidgrid = React.forwardRef((props, ref) => {
     const [streamss, setStreamss] = React.useState([])
     React.useImperativeHandle(ref, () => ({
-      append_stream(stream) {
-        let tmp = streamss
-        tmp.push(stream)
-        console.log(tmp, "pp")
-        setStreamss([...streamss, stream])
 
+      append_stream(stream, check) {
+        // let tmp = streamss
+        if (check) {
+          console.log(stream, 'accccdddd')
+          // tmp.push(stream)
+          let tmp = streamss
+          let checkk = tmp.some(el => el.id === stream.id);
+          console.log(checkk, "ffffffff")
+          if (!checkk) {
+            setStreamss([...streamss, stream])
+          }
+        }
+        else {
+          setStreamss([...streamss, stream])
+        }
+
+        // tmp.find(e => {
+        //   if (e.id !== stream.id) {
+        //   }
+        // })
+        console.log(stream.id, 'sssssssccc')
       }
     }));
 
     useEffect(() => {
-      console.log("1121212121", streamss.length)
+      console.log(streamss, "pp")
 
-    }, [streamss])
+    }, [])
 
     return (
       <>
         {
           streamss.length == 0 ? (<div style={{ "color": "white" }}>No Participants</div>) : (
             streamss.map((element, i) => {
+              // console.log("1121212121", streamss.length)
               console.log(element, 'aaa', i)
               return <Video remotestreams={element} ind={i} />
             })
