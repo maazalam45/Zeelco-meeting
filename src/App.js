@@ -24,6 +24,7 @@ import { io } from "socket.io-client";
 import Peer from "peerjs";
 
 import styled from "styled-components";
+
 const urlSearchParams = new URLSearchParams(window.location.search);
 const params = Object.fromEntries(urlSearchParams.entries());
 const socket = io("http://localhost:8000", {
@@ -91,13 +92,13 @@ function App() {
         setChangeScreenView(true)
       }
       socket.on("getScreenshare", (e) => {
+        console.log("step 2 sharing")
         if (e == "Stopped") {
           setChangeScreenView(false)
         }
         else {
           setSharingpeerid(e)
           setChangeScreenView(true)
-          console.log("step 2 sharing")
         }
       });
     })
@@ -131,21 +132,19 @@ function App() {
             // if (changeScreenView == true) {
             videoInput.current.srcObject = stream;
             // }
+
             peer.on("call", function (call) {
               console.log(call, "qqqqqqqqqqqqqqq")
               call.answer(stream); // Answer the call with an A/V stream.
-              let k = 0
-              call.on("stream", async function (remoteStream) {
+              call.on("stream", function (remoteStream) {
+                let tt = remoteStream.getTracks()
+                console.log("coll", tt)
+                vidgrid.current.append_stream(remoteStream, false)
+                //const id = await localStorage.getItem('Myid')
+                //let obj = remoteStream
+                //obj['peerid'] = id
+                console.log("dfdfdfdfdf", remoteStream)
 
-                k += 1
-                const id = await localStorage.getItem('Myid')
-                let obj = remoteStream
-                obj['peerid'] = id
-                if (k == 1) {
-                  console.log("dfdfdfdfdf")
-                  vidgrid.current.append_stream(remoteStream, false)
-
-                }
                 //setStreams([...streams, obj]);
                 // console.log(obj, "qwertyyyyyyy")
               });
@@ -555,12 +554,15 @@ function App() {
         }
         else {
           setStreamss([...streamss, stream])
+          // var res = streamss.filter(val => {
+          //   if (val.id == stream.id)
+          //     return val.id
+          // })
+          // console.log(res, streamss, "finn")
+          // if (res.length <= 1) {
+          //   setStreamss([...streamss, stream])
+          // }
         }
-
-        // tmp.find(e => {
-        //   if (e.id !== stream.id) {
-        //   }
-        // })
         console.log(stream.id, 'sssssssccc')
       }
     }));
@@ -574,6 +576,7 @@ function App() {
       <>
         {
           streamss.length == 0 ? (<div style={{ "color": "white" }}>No Participants</div>) : (
+
             streamss.map((element, i) => {
               // console.log("1121212121", streamss.length)
               console.log(element, 'aaa', i)
