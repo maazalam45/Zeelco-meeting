@@ -104,6 +104,7 @@ function App() {
     })
     socket.on("My_details", (details) => {
       // console.log(details, 'sss')
+      State_update(setMydetails, details, vidgrid)
       setMydetails(details)
     })
     // const myVideo = document.createElement("video");
@@ -116,19 +117,21 @@ function App() {
           video: true,
         })
           .then((stream) => {
+            setMystream(stream);
 
             socket.on("NewUser", (newuser) => {
               console.log(newuser, 'added');
-              setNewuserlist(null)
-              setNewuserlist(newuser)
+              // setNewuserlist(null)
+              State_update(setNewuserlist, newuser, vidgrid)
+              // setNewuserlist(newuser)
 
             })
             socket.on("get_messsage", (e) => {
               // console.log(e);
-              setChatlist((old) => [...old, e]);
+              State_update(setChatlist, (old) => [...old, e], vidgrid)
+              // setChatlist((old) => [...old, e]);
             });
 
-            setMystream(stream);
             // if (changeScreenView == true) {
             videoInput.current.srcObject = stream;
             // }
@@ -312,41 +315,59 @@ function App() {
 
   }, [screenshare]);
 
-  function call_user() {
-    var call = screen_share_peer.call(`${newuserlist.Screen_share_peer}`, mystream);
-    setUsersharingcalls([...usersharingcalls, call])
-    call.on("stream", function (remoteStream) {
+  // function call_user() {
+  //   var call = screen_share_peer.call(`${newuserlist.Screen_share_peer}`, mystream);
+  //   setUsersharingcalls([...usersharingcalls, call])
+  //   call.on("stream", function (remoteStream) {
 
-      let obj = remoteStream
-      obj['Screenshareid'] = newuserlist.Screen_share_peer
-      setScreenStreams([obj]);
-      // replaceStream(usercalls[0], stream)
-      // console.log(obj, "qwertyyyyffffyyy")
-    });
+  //     let obj = remoteStream
+  //     obj['Screenshareid'] = newuserlist.Screen_share_peer
+  //     setScreenStreams([obj]);
+  //     // replaceStream(usercalls[0], stream)
+  //     // console.log(obj, "qwertyyyyffffyyy")
+  //   });
+  // }
+
+
+
+  // function replaceStream(peerConnection, mediaStream) {
+  //   for (const sender of usercalls[0].peerConnection.getSenders()) {
+  //     if (sender.track.kind == "audio") {
+  //       if (mediaStream.getAudioTracks().length > 0) {
+  //         sender.replaceTrack(mediaStream.getAudioTracks()[0]);
+  //       }
+  //     }
+  //     if (sender.track.kind == "video") {
+  //       if (mediaStream.getVideoTracks().length > 0) {
+  //         sender.replaceTrack(mediaStream.getVideoTracks()[0]);
+  //       }
+  //     }
+  //   }
+  // }
+  function mute_mic_fucntion(setstate, device, vidgrid) {
+    let tmp = vidgrid.current.get_stream()
+    console.log("download:streams=>", tmp)
+    if (device == "audio")
+      setstate.getAudioTracks().forEach(track => track.enabled = !track.enabled);
+    else
+      setstate.getVideoTracks().forEach(track => track.enabled = !track.enabled);
+    setTimeout(() => {
+      vidgrid.current.upload_stream(tmp)
+    }, 0);
   }
 
-
-
-  function replaceStream(peerConnection, mediaStream) {
-    for (const sender of usercalls[0].peerConnection.getSenders()) {
-      if (sender.track.kind == "audio") {
-        if (mediaStream.getAudioTracks().length > 0) {
-          sender.replaceTrack(mediaStream.getAudioTracks()[0]);
-        }
-      }
-      if (sender.track.kind == "video") {
-        if (mediaStream.getVideoTracks().length > 0) {
-          sender.replaceTrack(mediaStream.getVideoTracks()[0]);
-        }
-      }
-    }
-  }
   const muteMic = () => {
-    mystream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
+    // console.log("ss")
+    mute_mic_fucntion(mystream, "audio", vidgrid)
+    //mystream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
+
   }
 
   const muteCam = () => {
-    mystream.getVideoTracks().forEach(track => track.enabled = !track.enabled);
+    // console.log("ss")
+    mute_mic_fucntion(mystream, "video", vidgrid)
+    // mystream.getVideoTracks().forEach(track => track.enabled = !track.enabled);
+
   }
 
   const Video = (props) => {
@@ -378,7 +399,7 @@ function App() {
 
 
     return (
-      <div key={props.ind} style={{ height: 200, width: 200, borderRadius: 10, position: 'relative' }} onMouseLeave={() => setShown(false)}>
+      <div key={props.ind} style={{ height: 200, width: 200, borderRadius: 10, position: 'relative', marginLeft: 5 }} onMouseLeave={() => setShown(false)}>
         <video
           style={{
             // position: "absolute",
@@ -434,14 +455,22 @@ function App() {
       message: message,
     });
 
-    setChatlist((old) => [
+    State_update(setChatlist, (old) => [
       ...old,
       {
         room: params["meeting_id"],
         Name: Mydetails.name,
         message: message,
       },
-    ]);
+    ], vidgrid)
+    // setChatlist((old) => [
+    //   ...old,
+    //   {
+    //     room: params["meeting_id"],
+    //     Name: Mydetails.name,
+    //     message: message,
+    //   },
+    // ]);
   };
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -452,14 +481,22 @@ function App() {
     setAnchorEl(null);
     console.log(Boolean(anchorEl), "endkkkkkkkkkkk");
   };
+  function State_update(setstate, value, vidgrid) {
+    let tmp = vidgrid.current.get_stream()
+    console.log("download:streams=>", tmp)
+    setstate(value)
+    setTimeout(() => {
+      vidgrid.current.upload_stream(tmp)
+    }, 0);
+  }
   function openModal() {
-    setIsOpen(true);
+    State_update(setIsOpen, true, vidgrid)
   }
 
 
 
   function closeModal() {
-    setIsOpen(false);
+    State_update(setIsOpen, false, vidgrid)
   }
   const chatopen = () => {
     if (chats === true) {
@@ -539,7 +576,13 @@ function App() {
   const Vidgrid = React.forwardRef((props, ref) => {
     const [streamss, setStreamss] = React.useState([])
     React.useImperativeHandle(ref, () => ({
-
+      get_stream() {
+        return streamss
+      },
+      upload_stream(streams) {
+        console.log("upload:streams=>", streams)
+        setStreamss(streams)
+      },
       append_stream(stream, check) {
         // let tmp = streamss
         if (check) {
@@ -576,7 +619,6 @@ function App() {
       <>
         {
           streamss.length == 0 ? (<div style={{ "color": "white" }}>No Participants</div>) : (
-
             streamss.map((element, i) => {
               // console.log("1121212121", streamss.length)
               console.log(element, 'aaa', i)
@@ -638,7 +680,7 @@ function App() {
 
             ) : (
                 members.map((element, i) => {
-                  return <div style={{ flexDirection: 'row', display: 'flex', marginTop: 10, width: '70%', justifyContent: 'center' }}><img src={`https://zeelco.com/public/profile_img/${element.profile_pic}`} alt="User's Image" style={{ height: 50, width: 50, borderRadius: 100 }} /><p style={{ marginLeft: "10%" }} className="modaluser">{element.name}</p></div>
+                  return <div style={{ flexDirection: 'row', display: 'flex', marginTop: 10, width: '70%', justifyContent: 'center' }}><img src={`https://zeelco.com/public/profile_img/${element.profile_pic}`} alt="User" style={{ height: 50, width: 50, borderRadius: 100 }} /><p style={{ marginLeft: "10%" }} className="modaluser">{element.name}</p></div>
                 })
               )}
           </div>
@@ -690,7 +732,7 @@ function App() {
                       {/* <p style={{ color: "white" }}>My video</p> */}
                     </video>
                     <p style={{ fontWeight: "bolder", color: "white", position: 'absolute', zIndex: 5, marginTop: 200, marginLeft: 47 }}>{Mydetails.name}</p>
-                    <Vidgrid streams={streams} ref={vidgrid}></Vidgrid>
+                    <Vidgrid ref={vidgrid}></Vidgrid>
                   </>)
               }
 
@@ -884,7 +926,7 @@ function App() {
                 value={message}
                 type="text"
                 placeholder="Type message here..."
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={(e) => State_update(setMessage, e.target.value, vidgrid)}
                 onKeyPress={(event) => {
                   if (event.key === "Enter") {
                     Sendmessage();
