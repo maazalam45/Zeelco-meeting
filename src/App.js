@@ -85,22 +85,22 @@ function App() {
 
   // let myVideoStream;
   useEffect(() => {
+    socket.on("getScreenshare", (e) => {
+      console.log(e, "changview")
+      if (e == "Stopped") {
+        setChangeScreenView(false)
+      }
+      else {
+        setSharingpeerid(e)
+        setChangeScreenView(true)
+      }
+    });
     socket.on("screenshareon", (status, peerid) => {
       console.log(status, peerid, 'hrhehrhthy')
       if (status == true) {
         setSharingpeerid(peerid)
         setChangeScreenView(true)
       }
-      socket.on("getScreenshare", (e) => {
-        console.log("step 2 sharing")
-        if (e == "Stopped") {
-          setChangeScreenView(false)
-        }
-        else {
-          setSharingpeerid(e)
-          setChangeScreenView(true)
-        }
-      });
     })
     socket.on("My_details", (details) => {
       // console.log(details, 'sss')
@@ -158,10 +158,10 @@ function App() {
               call.answer(stream); // Answer the call with an A/V stream.
               call.on("stream", async function (remoteStream) {
                 const id = await localStorage.getItem('MySharingid')
+                console.log("call recieved")
                 let obj = remoteStream
                 obj['Screenshareid'] = id
                 setScreenStreams([obj]);
-                // console.log(obj, "qwertyyyyyyy")
               });
             });
             socket.on("call", async (ee) => {
@@ -560,7 +560,9 @@ function App() {
             height: 500, width: "130%",
             borderRadius: 10,
             marginLeft: -100,
-            marginTop: "10%"
+            marginTop: "10%",
+            alignSelf: 'center',
+            justifySelf: 'center'
             // position: 'absolute',
             // zIndex: 1
           }}
@@ -630,6 +632,7 @@ function App() {
     )
   })
   const SharedScreen = (props) => {
+    console.log("step3sharing")
     const refs = React.useRef();
     useEffect(() => {
       console.log(props.remotestreams, 'sssss')
@@ -638,12 +641,15 @@ function App() {
 
     return (
       <><video
+        className="videosharing"
         style={{
           // position: "absolute",
           height: 500, width: "130%",
           borderRadius: 10,
           marginLeft: -100,
-          marginTop: "10%"
+          marginTop: "10%",
+          alignSelf: 'center',
+          justifySelf: 'center'
           // position: 'absolute',
           // zIndex: 1
         }}
@@ -698,12 +704,12 @@ function App() {
             <Container style={{ marginLeft: '15%' }}>
               {
                 changeScreenView == true ? <>
-                  {/* {console.log("step 2 sharing")} {console.log("step 3 sharing")}*/}
                   {screenshare == true ?
                     (<><MySharedScreen remotestreams={mystream} /></>)
                     : (
                       screenStreams.map((element, i) => {
                         // console.log(element, Sharingpeerid.peer_id, "ssssssss")
+                        { console.log("step 2 sharing") }
                         return <SharedScreen remotestreams={element} />
                       })
                     )}
@@ -731,7 +737,9 @@ function App() {
                     >
                       {/* <p style={{ color: "white" }}>My video</p> */}
                     </video>
-                    <p style={{ fontWeight: "bolder", color: "white", position: 'absolute', zIndex: 5, marginTop: 200, marginLeft: 47 }}>{Mydetails.name}</p>
+                    {Mydetails == null ? <></> :
+                      <p style={{ fontWeight: "bolder", color: "white", position: 'absolute', zIndex: 5, marginTop: 200, marginLeft: 47 }}>{Mydetails.name}</p>
+                    }
                     <Vidgrid ref={vidgrid}></Vidgrid>
                   </>)
               }
