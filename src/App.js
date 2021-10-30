@@ -95,7 +95,12 @@ function App() {
       else {
         setSharingpeerid(e)
         setChangeScreenView(true)
-        setSharingoff(true)
+        if (screenshare == true) {
+          setSharingoff(false)
+        }
+        else {
+          setSharingoff(true)
+        }
       }
     });
     socket.on("screenshareon", (status, peerid) => {
@@ -420,7 +425,7 @@ function App() {
 
         ></video>
         {shown && (
-          <div style={{ position: "absolute", background: 'grey', top: 0, height: 200, width: 200, borderRadius: 10, opacity: "70%", alignItems: 'center', justifyContent: 'center', display: 'flex' }}>
+          <div style={{ position: "absolute", background: 'grey', top: 0, height: 210, width: 210, borderRadius: 10, opacity: "70%", alignItems: 'center', justifyContent: 'center', display: 'flex', alignSelf: 'cente1' }}>
             <div>
               {/* {console.log('11')} */}
               {mic === true ? (
@@ -734,7 +739,7 @@ function App() {
                   (<>
                     <video
                       style={{
-                        // position: "absolute",
+                        // position: "absolute", 
                         height: 200, width: 200,
                         borderRadius: 10,
                       }}
@@ -744,7 +749,7 @@ function App() {
                       {/* <p style={{ color: "white" }}>My video</p> */}
                     </video>
                     {Mydetails == null ? <></> :
-                      <p style={{ fontWeight: "bolder", color: "white", position: 'absolute', zIndex: 5, marginTop: 200, marginLeft: 47 }}>{Mydetails.name}</p>
+                      <p style={{ fontWeight: "bolder", color: "white", position: 'absolute', zIndex: 5, marginTop: 210, marginLeft: 47 }}>{Mydetails.name}</p>
                     }
                     <Vidgrid ref={vidgrid}></Vidgrid>
                   </>)
