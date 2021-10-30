@@ -63,6 +63,7 @@ function App() {
   const vidgrid = React.useRef(null);
   // const remoteInput = React.useRef(null);
   const [Mydetails, setMydetails] = React.useState({});
+  const [sharingoff, setSharingoff] = React.useState(false)
   const [chats, setChats] = React.useState(true);
   const [voice, setVoice] = React.useState(true);
   const [mystream, setMystream] = React.useState(true);
@@ -89,10 +90,12 @@ function App() {
       console.log(e, "changview")
       if (e == "Stopped") {
         setChangeScreenView(false)
+        setSharingoff(false)
       }
       else {
         setSharingpeerid(e)
         setChangeScreenView(true)
+        setSharingoff(true)
       }
     });
     socket.on("screenshareon", (status, peerid) => {
@@ -620,13 +623,16 @@ function App() {
     return (
       <>
         {
-          streamss.length == 0 ? (<div style={{ "color": "white" }}>No Participants</div>) : (
-            streamss.map((element, i) => {
-              // console.log("1121212121", streamss.length)
-              console.log(element, 'aaa', i)
-              return <Video remotestreams={element} ind={i} />
-            })
-          )
+          streamss.length == 0 ? (
+            <></>
+          ) :
+            (
+              streamss.map((element, i) => {
+                // console.log("1121212121", streamss.length)
+                console.log(element, 'aaa', i)
+                return <Video remotestreams={element} ind={i} />
+              })
+            )
         }
       </>
     )
@@ -823,15 +829,22 @@ function App() {
                   open={Boolean(anchorEl)}
                   onClose={handleClose}
                 >
-                  <MenuItem onClick={Onscreenshare}>
+                  {sharingoff == false ? (
+                    <MenuItem onClick={Onscreenshare}>
+                      <MdScreenShare size={30} />
+                      {screenshare == false ? (
+                        <span style={{ marginLeft: 10 }}> Share Screen</span>
+                      ) : (
+                          <span style={{ marginLeft: 10 }}> Stop Sharing</span>
+                        )}
+                    </MenuItem>
+                  ) : (
+                      <MenuItem onClick={() => { }}>
+                        <MdScreenShare size={30} />
+                        <span style={{ marginLeft: 10 }}> Cannot Share</span>
+                      </MenuItem>
+                    )}
 
-                    <MdScreenShare size={30} />
-                    {screenshare == false ? (
-                      <span style={{ marginLeft: 10 }}> Share Screen</span>
-                    ) : (
-                        <span style={{ marginLeft: 10 }}> Stop Sharing</span>
-                      )}
-                  </MenuItem>
                   <MenuItem onClick={handleClose}>
                     <MdPersonalVideo size={30} />
                     <span style={{ marginLeft: 10 }}> White Board</span>
